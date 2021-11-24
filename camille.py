@@ -42,6 +42,11 @@ Y8b  d8 88   88 88  88  88   .88.   88booo. 88booo. 88.
 """
 
 
+def print_w(msg):
+    print(msg)
+    os.system("echo \"{0}\" >> {1}".format(msg, logFile))
+
+
 def show_banner():
     colors = ['bright_red', 'bright_green', 'bright_blue', 'cyan', 'magenta']
     try:
@@ -82,11 +87,14 @@ def frida_hook(app_name, wait_time=0, is_show=True, execl_file=None):
                 messages = data['messages']
                 stacks = data['stacks']
                 if is_show:
-                    print("------------------------------start---------------------------------")
-                    print("[*] {0}，APP行为：{1}，行为描述：{2}".format(alert_time, action, messages))
-                    print("[*] 调用堆栈：")
-                    print(stacks)
-                    print("-------------------------------end----------------------------------")
+                    print_w(
+                        "------------------------------start---------------------------------")
+                    print_w(
+                        "[*] {0}，APP行为：{1}，行为描述：{2}".format(alert_time, action, messages))
+                    print_w("[*] 调用堆栈：")
+                    print_w(stacks)
+                    print_w(
+                        "-------------------------------end----------------------------------")
                 if execl_file:
                     global index_row
                     worksheet.write(index_row, 0, alert_time, content_style)
@@ -187,15 +195,20 @@ def frida_hook(app_name, wait_time=0, is_show=True, execl_file=None):
 if __name__ == '__main__':
     show_banner()
 
-    parser = argparse.ArgumentParser(description="App privacy compliance testing.")
+    parser = argparse.ArgumentParser(
+        description="App privacy compliance testing.")
     parser.add_argument("package", help="APP_NAME ex: com.test.demo01 ")
-    parser.add_argument("--time", "-t", default=0, type=int, help="Delayed hook, the number is in seconds ex: 5")
+    parser.add_argument("--time", "-t", default=0, type=int,
+                        help="Delayed hook, the number is in seconds ex: 5")
     parser.add_argument("--noshow", "-ns", required=False, action="store_const", default=True, const=False,
                         help="Showing the alert message")
-    parser.add_argument("--file", "-f", metavar="<path>", required=False, help="Name of Excel file to write")
+    parser.add_argument("--file", "-f", metavar="<path>",
+                        required=False, help="Name of Excel file to write")
 
     args = parser.parse_args()
     # 全局变量
     isHook = False
     index_row = 1
+    logFile = "./" + args.package + ".txt"
+    os.system("echo \"start launch \n \" > {0}".format(logFile))
     frida_hook(args.package, args.time, args.noshow, args.file)

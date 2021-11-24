@@ -19,8 +19,9 @@ function getStackTrace() {
 function alertSend(action, messages) {
     var myDate = new Date();
     var _time = myDate.getFullYear() + "-" + myDate.getMonth() + "-" + myDate.getDate() + " " + myDate.getHours() + ":" + myDate.getMinutes() + ":" + myDate.getSeconds();
-    send({"type": "notice", "time": _time, "action": action, "messages": messages, "stacks": getStackTrace()});
+    send({ "type": "notice", "time": _time, "action": action, "messages": messages, "stacks": getStackTrace() });
 }
+
 
 
 // APP申请权限
@@ -180,6 +181,12 @@ function getAndroidId() {
         alertSend("获取Android ID", "参数为：" + p2 + "，获取到的ID为：" + temp);
         return temp;
     }
+
+    SettingsSecure.getStringForUser.implementation = function (p1, p2, p3) {
+        var temp = this.getStringForUser(p1, p2, p3);
+        alertSend("获取getStringForUser", "参数为：p1 = " + p1 + " p2 = " + p2 + " p3 = " + p3 + "，获取到的ID为：" + temp);
+        return temp;
+    }
 }
 
 //获取其他app信息
@@ -218,11 +225,30 @@ function getPackageManager() {
         return temp;
     };
 
+    ApplicationPackageManager.getInstalledPackagesAsUser.implementation = function (p1, p2) {
+        var temp = this.getInstalledPackagesAsUser(p1, p2);
+        alertSend("获取其他app信息", "参数为：" + p1 + p2 + "，getInstalledPackagesAsUser获取的数据为：" + temp);
+        return temp;
+    }
+
+
+    ApplicationPackageManager.isInstantApp.overload().implementation = function () {
+        var temp = this.isInstantApp();
+        alertSend("获取其他app信息", "isInstantApp获取的数据为：" + temp);
+        return temp;
+    }
+
+    ApplicationPackageManager.getInstantApps.implementation = function () {
+        var temp = this.getInstantApps();
+        alertSend("获取其他app信息", "getInstantApps获取的数据为：" + temp);
+        return temp;
+    }
+
     ApplicationPackageManager.getApplicationInfo.implementation = function (p1, p2) {
         var temp = this.getApplicationInfo(p1, p2);
         var string_to_recv;
         // 判断是否为自身应用，是的话不记录
-        send({"type": "app_name", "data": p1});
+        send({ "type": "app_name", "data": p1 });
 
         recv(function (received_json_object) {
             string_to_recv = received_json_object.my_data;
@@ -434,7 +460,7 @@ function getCidorLac() {
 function main() {
     Java.perform(function () {
         console.log("合规检测敏感接口开始监控...");
-        send({"type": "isHook"})
+        send({ "type": "isHook" })
         checkRequestPermission();
         getPhoneState();
         getSystemProperties();
