@@ -86,11 +86,16 @@ def frida_hook(app_name, wait_time=0, is_show=True, execl_file=None):
                 action = data['action']
                 messages = data['messages']
                 stacks = data['stacks']
+                start_time = data['start_time']
+                frequency = data['frequency']
+                delay_time = data['delay_time']
                 if is_show:
                     print_w(
                         "------------------------------start---------------------------------")
                     print_w(
                         "[*] {0}，APP行为：{1}，行为描述：{2}".format(alert_time, action, messages))
+                    print_w("[*] start_time:{0}, delay_time:{1}ms , action_count:{2}".format(
+                        start_time, delay_time, frequency))
                     print_w("[*] 调用堆栈：")
                     print_w(stacks)
                     print_w(

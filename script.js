@@ -1,4 +1,7 @@
 // 获取调用链
+var frequencyMap = new Map();
+var timeMap = new Map();
+
 function getStackTrace() {
     var Exception = Java.use("java.lang.Exception");
     var ins = Exception.$new("Exception");
@@ -19,7 +22,13 @@ function getStackTrace() {
 function alertSend(action, messages) {
     var myDate = new Date();
     var _time = myDate.getFullYear() + "-" + myDate.getMonth() + "-" + myDate.getDate() + " " + myDate.getHours() + ":" + myDate.getMinutes() + ":" + myDate.getSeconds();
-    send({ "type": "notice", "time": _time, "action": action, "messages": messages, "stacks": getStackTrace() });
+    if (!timeMap.has(action)) timeMap.set(action, myDate.getTime());
+    if (!frequencyMap.has(action)) frequencyMap.set(action, 0);
+    var frequency = frequencyMap.get(action);
+    frequency++;
+    frequencyMap.set(action, frequency);
+    var startTime = timeMap.get(action);
+    send({ "type": "notice", "time": _time, "start_time": startTime, "delay_time": (myDate.getTime() - startTime), "frequency": frequency, "action": action, "messages": messages, "stacks": getStackTrace() });
 }
 
 
@@ -457,6 +466,15 @@ function getCidorLac() {
 
 }
 
+function getClipboradInfo() {
+    var ClipboardManager = Java.use("android.content.ClipboardManager");
+    ClipboardManager.getPrimaryClip.implementation = function () {
+        var temp = this.getPrimaryClip();
+        alertSend("获取剪切板信息", "获取到的info： " + temp);
+        return temp;
+    }
+}
+
 function main() {
     Java.perform(function () {
         console.log("合规检测敏感接口开始监控...");
@@ -471,7 +489,7 @@ function main() {
         getCamera();
         getNetwork();
         getBluetooth();
-
+        getClipboradInfo();
     });
 }
 
